@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved Submissions</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f5f7;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+    margin: 0;
+  }
+  .container {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 700px;
+  }
+  h1 {
+    font-size: 1.4rem;
+    margin: 0 0 0.3rem;
+    color: #222;
+  }
+  .subtitle {
+    color: #888;
+    font-size: 0.85rem;
+    margin: 0 0 1.5rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  th {
+    color: #555;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  td {
+    color: #333;
+  }
+  #empty {
+    color: #888;
+    font-size: 0.9rem;
+  }
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+  a.button, button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+  }
+  a.button {
+    background: #2d6cdf;
+    color: #fff;
+  }
+  a.button:hover {
+    background: #1f54b5;
+  }
+  button#clearBtn {
+    background: #f4f5f7;
+    color: #c0392b;
+    border: 1px solid #e0c6c3;
+  }
+  button#clearBtn:hover {
+    background: #fbeceb;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Saved Submissions</h1>
+  <p class="subtitle">Reads directly from this browser's localStorage — data submitted on other devices or browsers will not appear here.</p>
+
+  <div id="empty" style="display:none;">No submissions saved yet.</div>
+
+  <table id="table" style="display:none;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone Number</th>
+        <th>Email</th>
+        <th>Date of Birth</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <div class="actions">
+    <a class="button" href="index.html">Back to form</a>
+    <button id="clearBtn" type="button">Clear all</button>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'userFormSubmissions';
+
+  function loadSubmissions() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function render() {
+    const submissions = loadSubmissions();
+    const table = document.getElementById('table');
+    const empty = document.getElementById('empty');
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    if (submissions.length === 0) {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    table.style.display = 'table';
+
+    submissions.slice().reverse().forEach((entry) => {
+      const row = document.createElement('tr');
+      ['name', 'number', 'email', 'dob'].forEach((field) => {
+        const td = document.createElement('td');
+        td.textContent = entry[field] || '';
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    });
+  }
+
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    if (confirm('Clear all saved submissions from this browser?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    }
+  });
+
+  render();
+</script>
+
+</body>
+</html>
