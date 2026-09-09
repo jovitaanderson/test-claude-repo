@@ -8,10 +8,31 @@
   body {
     font-family: Arial, sans-serif;
     background: #f4f5f7;
+    margin: 0;
+  }
+  .topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+  }
+  .topbar label {
+    font-size: 0.8rem;
+    color: #555;
+    font-weight: bold;
+  }
+  .topbar select {
+    padding: 0.35rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 0.85rem;
+  }
+  .page {
     display: flex;
     justify-content: center;
-    padding: 3rem 1rem;
-    margin: 0;
+    padding: 1rem 1rem 3rem;
   }
   .container {
     background: #fff;
@@ -54,6 +75,14 @@
     color: #888;
     font-size: 0.9rem;
   }
+  #restricted {
+    color: #c0392b;
+    font-size: 0.95rem;
+    background: #fbeceb;
+    border: 1px solid #e0c6c3;
+    border-radius: 6px;
+    padding: 1rem;
+  }
   .actions {
     display: flex;
     justify-content: space-between;
@@ -88,32 +117,66 @@
 </head>
 <body>
 
+<div class="topbar">
+  <label for="roleSelect">Preview as:</label>
+  <select id="roleSelect">
+    <option value="user">User</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
+
+<div class="page">
 <div class="container">
   <h1>Saved Submissions</h1>
   <p class="subtitle">Reads directly from this browser's localStorage — data submitted on other devices or browsers will not appear here.</p>
 
-  <div id="empty" style="display:none;">No submissions saved yet.</div>
-
-  <table id="table" style="display:none;">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Phone Number</th>
-        <th>Email</th>
-        <th>Date of Birth</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <div class="actions">
-    <a class="button" href="index.html">Back to form</a>
-    <button id="clearBtn" type="button">Clear all</button>
+  <div id="restricted" style="display:none;">
+    Admin access required to view submissions. Switch "Preview as" to Admin above.
   </div>
+
+  <div id="adminView" style="display:none;">
+    <div id="empty" style="display:none;">No submissions saved yet.</div>
+
+    <table id="table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone Number</th>
+          <th>Email</th>
+          <th>Date of Birth</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="actions">
+      <a class="button" href="index.html">Back to form</a>
+      <button id="clearBtn" type="button">Clear all</button>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
   const STORAGE_KEY = 'userFormSubmissions';
+  const ROLE_KEY = 'demoRole';
+
+  function getRole() {
+    return localStorage.getItem(ROLE_KEY) || 'user';
+  }
+
+  function applyRole() {
+    const role = getRole();
+    document.getElementById('roleSelect').value = role;
+    document.getElementById('restricted').style.display = role === 'admin' ? 'none' : 'block';
+    document.getElementById('adminView').style.display = role === 'admin' ? 'block' : 'none';
+  }
+
+  document.getElementById('roleSelect').addEventListener('change', function (e) {
+    localStorage.setItem(ROLE_KEY, e.target.value);
+    applyRole();
+    render();
+  });
 
   function loadSubmissions() {
     try {
@@ -157,6 +220,7 @@
     }
   });
 
+  applyRole();
   render();
 </script>
 
