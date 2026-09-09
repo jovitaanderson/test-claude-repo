@@ -62,10 +62,47 @@
     color: #2d6cdf;
     font-weight: bold;
   }
+  #entries {
+    background: #fff;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1.5rem;
+  }
+  #entries h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.75rem;
+    color: #222;
+  }
+  #entries ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  #entries li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #444;
+  }
+  #entries li:last-child {
+    border-bottom: none;
+  }
+  #entries li strong {
+    color: #222;
+  }
+  #entries p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+  }
 </style>
 </head>
 <body>
 
+<div>
 <form id="userForm">
   <h1>User Information</h1>
 
@@ -86,7 +123,46 @@
   <div id="result"></div>
 </form>
 
+<div id="entries">
+  <h2>Saved Submissions (this browser)</h2>
+  <ul id="entriesList"></ul>
+</div>
+</div>
+
 <script>
+  const STORAGE_KEY = 'userFormSubmissions';
+
+  function loadSubmissions() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function renderSubmissions() {
+    const list = document.getElementById('entriesList');
+    const submissions = loadSubmissions();
+    list.innerHTML = '';
+
+    if (submissions.length === 0) {
+      list.innerHTML = '<p>No submissions saved yet.</p>';
+      return;
+    }
+
+    submissions.slice().reverse().forEach((entry) => {
+      const li = document.createElement('li');
+
+      const strong = document.createElement('strong');
+      strong.textContent = entry.name;
+      li.appendChild(strong);
+      li.appendChild(document.createElement('br'));
+      li.appendChild(document.createTextNode(`${entry.number} · ${entry.email} · DOB: ${entry.dob}`));
+
+      list.appendChild(li);
+    });
+  }
+
   document.getElementById('userForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const name = document.getElementById('name').value;
@@ -94,9 +170,18 @@
     const email = document.getElementById('email').value;
     const dob = document.getElementById('dob').value;
 
+    const submissions = loadSubmissions();
+    submissions.push({ name, number, email, dob });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
+
     document.getElementById('result').textContent =
       `Thanks, ${name}! Received: ${number}, ${email}, DOB: ${dob}`;
+
+    e.target.reset();
+    renderSubmissions();
   });
+
+  renderSubmissions();
 </script>
 
 </body>
